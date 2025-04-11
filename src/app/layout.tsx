@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import Navbar from "@/components/Navbar";
+import { ClerkProvider } from "@clerk/nextjs";
 
 
 export const metadata: Metadata = {
@@ -16,14 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body
-          className={`antialiased`}
-        >
-          <Navbar/>
-          {children}
-        </body>
-      </html>
+        <html lang="en">
+          <body className={`antialiased`}>
+            {children}
+          </body>
+        </html>
     </ClerkProvider>
   );
 }

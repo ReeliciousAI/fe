@@ -1,9 +1,7 @@
 import {
-  SignedIn,
   SignedOut,
   SignInButton,
   SignUpButton,
-  UserButton,
 } from "@clerk/nextjs";
 
 export default function Navbar() {
@@ -17,9 +15,6 @@ export default function Navbar() {
           <SignInButton />
           <SignUpButton />
         </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
       </div>
     </header>
   );
