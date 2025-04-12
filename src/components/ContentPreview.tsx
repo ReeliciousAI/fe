@@ -1,99 +1,105 @@
-import { cn } from "@/lib/utils"
-import { useEffect, useRef, useState } from "react"
+import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from "react";
 
 interface ContentPreviewProps {
-  layout: string
-  overlayFormat: string
-  prompt: string
-  overlayFile: File | null
+  layout: string;
+  overlayFormat: string;
+  prompt: string;
+  overlayFile: File | null;
 }
 
-export function ContentPreview({ layout, overlayFormat, prompt, overlayFile }: ContentPreviewProps) {
-  const [videoPreview, setVideoPreview] = useState<string | null>(null)
-  const [dividerPosition, setDividerPosition] = useState(50)
-  const [isDragging, setIsDragging] = useState(false)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+export function ContentPreview({
+  layout,
+  overlayFormat,
+  prompt,
+  overlayFile,
+}: ContentPreviewProps) {
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const [dividerPosition, setDividerPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (overlayFile) {
-      const url = URL.createObjectURL(overlayFile)
-      setVideoPreview(url)
-      return () => URL.revokeObjectURL(url)
+      const url = URL.createObjectURL(overlayFile);
+      setVideoPreview(url);
+      return () => URL.revokeObjectURL(url);
     }
-  }, [overlayFile])
+  }, [overlayFile]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true)
-    e.preventDefault()
-  }
+    setIsDragging(true);
+    e.preventDefault();
+  };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging || !containerRef.current) return
+    if (!isDragging || !containerRef.current) return;
 
-    const container = containerRef.current
-    const rect = container.getBoundingClientRect()
-    const position = overlayFormat === "split" 
-      ? ((e.clientX - rect.left) / rect.width) * 100
-      : ((e.clientY - rect.top) / rect.height) * 100
-    setDividerPosition(Math.max(20, Math.min(80, position)))
-  }
+    const container = containerRef.current;
+    const rect = container.getBoundingClientRect();
+    const position =
+      overlayFormat === "split"
+        ? ((e.clientX - rect.left) / rect.width) * 100
+        : ((e.clientY - rect.top) / rect.height) * 100;
+    setDividerPosition(Math.max(20, Math.min(80, position)));
+  };
 
   const handleMouseUp = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove)
-      window.addEventListener('mouseup', handleMouseUp)
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
     }
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
-    }
-  }, [isDragging])
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
 
   const getLayoutClass = () => {
     switch (layout) {
       case "landscape":
-        return "w-[533px] h-[300px]" // 16:9
+        return "w-[533px] h-[300px]"; // 16:9
       case "portrait":
-        return "w-[169px] h-[300px] mx-auto" // 9:16
+        return "w-[169px] h-[300px] mx-auto"; // 9:16
       case "square":
-        return "w-[300px] h-[300px] mx-auto" // 1:1
+        return "w-[300px] h-[300px] mx-auto"; // 1:1
       case "vertical":
-        return "w-[240px] h-[300px] mx-auto" // 4:5
+        return "w-[240px] h-[300px] mx-auto"; // 4:5
       default:
-        return "w-[533px] h-[300px]"
+        return "w-[533px] h-[300px]";
     }
-  }
+  };
 
   const getOverlayClass = () => {
     switch (overlayFormat) {
       case "top":
-        return "flex flex-col"
+        return "flex flex-col";
       case "bottom":
-        return "flex flex-col"
+        return "flex flex-col";
       case "split":
-        return "flex"
+        return "flex";
       default:
-        return ""
+        return "";
     }
-  }
+  };
 
   const getTextClass = () => {
     switch (layout) {
       case "portrait":
-        return "text-[10px] max-w-[140px]"
+        return "text-[10px] max-w-[140px]";
       case "vertical":
-        return "text-[11px] max-w-[200px]"
+        return "text-[11px] max-w-[200px]";
       case "square":
-        return "text-sm max-w-[250px]"
+        return "text-sm max-w-[250px]";
       default:
-        return "text-sm max-w-[400px]"
+        return "text-sm max-w-[400px]";
     }
-  }
+  };
 
   const renderOverlayContent = (isOverlay: boolean) => {
     if (isOverlay) {
@@ -108,16 +114,18 @@ export function ContentPreview({ layout, overlayFormat, prompt, overlayFile }: C
               playsInline
             />
           </div>
-        )
+        );
       }
       return (
         <div className="text-center p-2">
           <div className="text-xl mb-1">🎮</div>
-          <p className={cn("text-muted-foreground break-words", getTextClass())}>
+          <p
+            className={cn("text-muted-foreground break-words", getTextClass())}
+          >
             Upload Video
           </p>
         </div>
-      )
+      );
     }
     return (
       <div className="text-center p-2">
@@ -126,38 +134,40 @@ export function ContentPreview({ layout, overlayFormat, prompt, overlayFile }: C
           {prompt || "Generated AI Content"}
         </p>
       </div>
-    )
-  }
+    );
+  };
 
   const renderDivider = () => {
-    if (overlayFormat === "none") return null
+    if (overlayFormat === "none") return null;
 
     return (
       <div
         className={cn(
-          "absolute bg-primary/20 cursor-col-resize hover:bg-primary/40 transition-colors",
+          "absolute bg-primary/20 hover:bg-primary/40 transition-colors",
           overlayFormat === "split" ? "w-1 h-full top-0" : "h-1 w-full left-0",
-          isDragging && "bg-primary/60"
+          isDragging && "bg-primary/60",
+          overlayFormat !== "split" ? "cursor-row-resize" : "cursor-col-resize",
         )}
         style={{
           [overlayFormat === "split" ? "left" : "top"]: `${dividerPosition}%`,
-          transform: overlayFormat === "split" ? "translateX(-50%)" : "translateY(-50%)",
+          transform:
+            overlayFormat === "split" ? "translateX(-50%)" : "translateY(-50%)",
         }}
         onMouseDown={handleMouseDown}
       />
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-2">
       <h3 className="text-sm font-medium text-muted-foreground">Preview</h3>
       <div className="w-full h-[300px] flex items-center justify-center">
-        <div 
+        <div
           ref={containerRef}
           className={cn(
             "bg-muted/50 rounded-lg overflow-hidden border border-border relative",
             getLayoutClass(),
-            getOverlayClass()
+            getOverlayClass(),
           )}
         >
           {overlayFormat === "none" ? (
@@ -168,13 +178,13 @@ export function ContentPreview({ layout, overlayFormat, prompt, overlayFile }: C
             <>
               {overlayFormat === "top" && (
                 <>
-                  <div 
+                  <div
                     className="bg-primary/10 flex items-center justify-center"
                     style={{ height: `${dividerPosition}%` }}
                   >
                     {renderOverlayContent(true)}
                   </div>
-                  <div 
+                  <div
                     className="bg-primary/5 flex items-center justify-center"
                     style={{ height: `${100 - dividerPosition}%` }}
                   >
@@ -184,13 +194,13 @@ export function ContentPreview({ layout, overlayFormat, prompt, overlayFile }: C
               )}
               {overlayFormat === "bottom" && (
                 <>
-                  <div 
+                  <div
                     className="bg-primary/5 flex items-center justify-center"
                     style={{ height: `${dividerPosition}%` }}
                   >
                     {renderOverlayContent(false)}
                   </div>
-                  <div 
+                  <div
                     className="bg-primary/10 flex items-center justify-center"
                     style={{ height: `${100 - dividerPosition}%` }}
                   >
@@ -200,13 +210,13 @@ export function ContentPreview({ layout, overlayFormat, prompt, overlayFile }: C
               )}
               {overlayFormat === "split" && (
                 <>
-                  <div 
+                  <div
                     className="bg-primary/10 flex items-center justify-center"
                     style={{ width: `${dividerPosition}%` }}
                   >
                     {renderOverlayContent(true)}
                   </div>
-                  <div 
+                  <div
                     className="bg-primary/5 flex items-center justify-center"
                     style={{ width: `${100 - dividerPosition}%` }}
                   >
@@ -220,5 +230,6 @@ export function ContentPreview({ layout, overlayFormat, prompt, overlayFile }: C
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}
+

@@ -1,40 +1,52 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { LayoutSelector } from "@/components/LayoutSelector"
-import { QualitySelector } from "@/components/QualitySelector"
-import { OverlayFormatSelector } from "@/components/OverlayFormatSelector"
-import { ContentPreview } from "@/components/ContentPreview"
-import { useState } from "react"
+"use client";
 
+import { Button } from "@/components/ui/button";
+import { LayoutSelector } from "@/components/LayoutSelector";
+import { QualitySelector } from "@/components/QualitySelector";
+import { OverlayFormatSelector } from "@/components/OverlayFormatSelector";
+import { ContentPreview } from "@/components/ContentPreview";
+import { useEffect, useState } from "react";
+import { useRBBT } from "@/hooks/use-rbbt";
 
 export default function PromptPage() {
+  const [selectedLayout, setSelectedLayout] = useState("landscape");
+  const [selectedQuality, setSelectedQuality] = useState("standard");
+  const [selectedFormat, setSelectedFormat] = useState("none");
+  const [prompt, setPrompt] = useState("");
+  const [overlayFile, setOverlayFile] = useState<File | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { client, createDisposableQueue, convertByteArrayToJSON } = useRBBT();
 
-  const [selectedLayout, setSelectedLayout] = useState("landscape")
-  const [selectedQuality, setSelectedQuality] = useState("standard")
-  const [selectedFormat, setSelectedFormat] = useState("none")
-  const [prompt, setPrompt] = useState("")
-  const [overlayFile, setOverlayFile] = useState<File | null>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
+  useEffect(() => {
+    if (client) {
+      const q = createDisposableQueue("ai", "hi");
+      if (q) {
+        q.subscribe({ noAck: true }, (msg) => {
+          const obj = convertByteArrayToJSON(msg.body as Uint8Array);
+          console.log(obj);
+        });
+      }
+    }
+  }, [client]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      setOverlayFile(file)
+      setOverlayFile(file);
     }
-  }
+  };
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return
+    if (!prompt.trim()) return;
 
-    setIsGenerating(true)
     try {
-      const formData = new FormData()
-      formData.append("prompt", prompt)
-      formData.append("layout", selectedLayout)
-      formData.append("quality", selectedQuality)
-      formData.append("overlayFormat", selectedFormat)
+      const formData = new FormData();
+      formData.append("prompt", prompt);
+      formData.append("layout", selectedLayout);
+      formData.append("quality", selectedQuality);
+      formData.append("overlayFormat", selectedFormat);
       if (overlayFile) {
-        formData.append("overlayFile", overlayFile)
+        formData.append("overlayFile", overlayFile);
       }
 
       // Log request data
@@ -45,31 +57,32 @@ export default function PromptPage() {
         overlayFormat: selectedFormat,
         hasOverlayFile: !!overlayFile,
         overlayFileName: overlayFile?.name,
-        overlayFileSize: overlayFile ? `${(overlayFile.size / 1024 / 1024).toFixed(2)}MB` : null
-      })
+        overlayFileSize: overlayFile
+          ? `${(overlayFile.size / 1024 / 1024).toFixed(2)}MB`
+          : null,
+      });
 
       // Mock API call
       const response = await fetch("/api/generate-content", {
         method: "POST",
         body: formData,
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to generate content")
+        throw new Error("Failed to generate content");
       }
 
-      const data = await response.json()
-      console.log("Generated content:", data)
-      
+      const data = await response.json();
+      console.log("Generated content:", data);
+
       // Navigate to results page with the generated video data
-      
     } catch (error) {
-      console.error("Error generating content:", error)
+      console.error("Error generating content:", error);
       // Handle error (show toast, etc.)
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-svh p-6 bg-gradient-to-b from-background to-background/95">
@@ -82,7 +95,7 @@ export default function PromptPage() {
             Generate amazing videos with AI
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-2 gap-8">
           {/* Left column - Prompt and Options */}
           <div className="space-y-6">
@@ -116,7 +129,7 @@ export default function PromptPage() {
                 selectedFormat={selectedFormat}
                 onSelect={setSelectedFormat}
               />
-              
+
               {selectedFormat !== "none" && (
                 <div className="mt-3">
                   <label className="block text-sm font-medium mb-1">
@@ -160,17 +173,21 @@ export default function PromptPage() {
         </div>
 
         <div className="flex flex-col gap-3 pt-2">
-          <Button 
-            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all" 
+          <Button
+            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
             size="lg"
-            disabled={!prompt.trim() || (selectedFormat !== "none" && !overlayFile) || isGenerating}
+            disabled={
+              !prompt.trim() ||
+              (selectedFormat !== "none" && !overlayFile) ||
+              isGenerating
+            }
             onClick={handleGenerate}
           >
             {isGenerating ? "Generating..." : "Generate Content"}
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={()=>{}}
+          <Button
+            variant="outline"
+            onClick={() => {}}
             className="w-full hover:bg-primary/10 hover:text-primary transition-colors"
           >
             Back to Home
@@ -178,5 +195,5 @@ export default function PromptPage() {
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}
