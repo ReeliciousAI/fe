@@ -2,119 +2,156 @@
 
 import { Button } from "@/components/ui/button";
 import { QualitySelector } from "@/components/QualitySelector";
-import { useEffect, useState } from "react";
-import { useRBBT } from "rbbt-client/next";
+import { useState } from "react";
 import TemplateSelect from "@/components/TemplateSelect";
-
+import { useAuth } from "@clerk/nextjs";
+import { BACKEND_FILE_URL, BACKEND_PROMPT_URL } from "@/config";
 
 const videos = [
   {
     id: 1,
     name: "Video 1",
     videoUrl: "https://cdn.revid.ai/subway_surfers/LOW_RES/1.mp4",
-    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/1.png"
+    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/1.png",
   },
   {
     id: 2,
     name: "Video 2",
     videoUrl: "https://cdn.revid.ai/subway_surfers/LOW_RES/2.mp4",
-    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/2.png"
+    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/2.png",
   },
   {
     id: 3,
     name: "Video 3",
     videoUrl: "https://cdn.revid.ai/subway_surfers/LOW_RES/3.mp4",
-    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/3.png"
+    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/3.png",
   },
   {
     id: 4,
     name: "Video 4",
     videoUrl: "https://cdn.revid.ai/subway_surfers/LOW_RES/4.mp4",
-    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/4.png"
+    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/4.png",
   },
   {
     id: 5,
     name: "Video 5",
     videoUrl: "https://cdn.revid.ai/subway_surfers/LOW_RES/5.mp4",
-    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/5.png"
+    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/5.png",
   },
   {
     id: 6,
     name: "Video 6",
     videoUrl: "https://cdn.revid.ai/subway_surfers/LOW_RES/6.mp4",
-    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/6.png"
-  }
+    imageUrl: "https://cdn.revid.ai/subway_surfers/thumbnails/6.png",
+  },
 ];
 
 const audioFiles = [
   {
     id: 1,
     name: "Blade runer",
-    url: "https://cdn.revid.ai/audio/_bladerunner-2049.mp3"
+    url: "https://cdn.revid.ai/audio/_bladerunner-2049.mp3",
   },
   {
     id: 2,
     name: "Paris Elise",
-    url: "https://cdn.revid.ai/audio/_paris-else.mp3"
+    url: "https://cdn.revid.ai/audio/_paris-else.mp3",
   },
   {
     id: 3,
     name: "Observer",
-    url: "https://cdn.revid.ai/audio/observer.mp3"
+    url: "https://cdn.revid.ai/audio/observer.mp3",
   },
   {
     id: 4,
     name: "Izzamusic",
-    url: "https://cdn.revid.ai/audio/_izzamuzzic.mp3"
-  }
+    url: "https://cdn.revid.ai/audio/_izzamuzzic.mp3",
+  },
 ];
 
 const toneOptions = [
   {
+    name: "Neutral",
+    id: 0,
+    description: "Emotionally balanced, with no strong feelings expressed.",
+  },
+  {
+    name: "Happy",
     id: 1,
-    name: "Professional",
-    description: "Clear and formal tone"
+    description: "A positive, joyful, or content emotional state.",
   },
   {
+    name: "Sad",
     id: 2,
-    name: "Casual",
-    description: "Friendly and conversational"
+    description: "A feeling of sorrow, disappointment, or unhappiness.",
   },
   {
+    name: "Angry",
     id: 3,
-    name: "Enthusiastic",
-    description: "Energetic and engaging"
+    description:
+      "Intense displeasure or hostility, often in response to frustration or injustice.",
   },
   {
+    name: "Afraid",
     id: 4,
-    name: "Educational",
-    description: "Informative and detailed"
-  }
+    description:
+      "An emotional reaction to threat or danger, often resulting in fear or anxiety.",
+  },
+  {
+    name: "Disgusted",
+    id: 5,
+    description:
+      "A strong feeling of aversion or revulsion toward something unpleasant.",
+  },
+  {
+    name: "Surprised",
+    id: 6,
+    description: "A reaction to something unexpected or astonishing.",
+  },
+  {
+    name: "Excited",
+    id: 7,
+    description:
+      "High energy and enthusiasm, often in anticipation of something positive.",
+  },
+  {
+    name: "Horny",
+    id: 8,
+    description: "Experiencing sexual arousal or desire.",
+  },
+  {
+    name: "Assertive",
+    id: 9,
+    description:
+      "Confident and self-assured in expression without being aggressive.",
+  },
+  {
+    name: "Submissive",
+    id: 10,
+    description:
+      "Yielding to the will of others; compliant or passive in behavior.",
+  },
+  {
+    name: "Skibidi",
+    id: 11,
+    description:
+      "Chaotic or absurd emotional energy; meme-inspired nonsensical vibe.",
+  },
 ];
 
 export default function PromptPage() {
+  const {getToken} = useAuth();
   const [selectedAudio, setSelectedAudio] = useState<number | null>(null);
   const [selectedTone, setSelectedTone] = useState<number | null>(null);
   const [selectedQuality, setSelectedQuality] = useState("standard");
-  const [selectedTemplate, setSelectedTemplate] = useState<number|null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
-  const [overlayFile, setOverlayFile] = useState<File | null>(null);
   const [scriptFile, setScriptFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [scriptSource, setScriptSource] = useState<"prompt" | "file">("prompt");
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
-  const { createDisposableQueue, convertByteArrayToJSON } = useRBBT();
 
-  useEffect(() => {
-    const q = createDisposableQueue("ai", "hi");
-    if (q) {
-      q.subscribe({ noAck: true }, (msg) => {
-        const obj = convertByteArrayToJSON(msg.body as Uint8Array);
-        console.log(obj);
-      });
-    }
-  }, []);
 
   const handlePlayAudio = (id: number, url: string) => {
     if (currentlyPlaying === id) {
@@ -129,7 +166,7 @@ export default function PromptPage() {
       if (audioPlayer) {
         audioPlayer.pause();
       }
-      
+
       // Play the new audio
       const newAudio = new Audio(url);
       newAudio.play();
@@ -141,13 +178,6 @@ export default function PromptPage() {
         setCurrentlyPlaying(null);
         setAudioPlayer(null);
       };
-    }
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setOverlayFile(file);
     }
   };
 
@@ -167,52 +197,78 @@ export default function PromptPage() {
   };
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return;
+    console.log(scriptSource, prompt, scriptFile, selectedTone, selectedAudio, selectedTemplate);
+    if (!prompt.trim() && !scriptFile) return;
+    const token = await getToken();
+    if (scriptSource === "prompt" && !scriptFile) {
+      try {
+        setIsGenerating(true);
+        const body = {
+          prompt,
+          tone: selectedTone,
+          audio: selectedAudio,
+          video: selectedTemplate,
+        };
+        // Mock API call
+        const response = await fetch(
+          BACKEND_PROMPT_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Authorization": `Bearer ${!token || ""}`,
+            },
+            body: JSON.stringify(body),
+          }
+        );
 
-    try {
-      const formData = new FormData();
-      formData.append("prompt", prompt);
-      formData.append("quality", selectedQuality);
-      formData.append("overlayFormat", selectedTemplate ? videos[selectedTemplate-1].videoUrl : "none");
-      if (overlayFile) {
-        formData.append("overlayFile", overlayFile);
+        if (!response.ok) {
+          throw new Error("Failed to generate content");
+        }
+
+        const data = await response.json();
+        console.log("Generated content:", data);
+
+        // Navigate to results page with the generated video data
+      } catch (error) {
+        console.error("Error generating content:", error);
+        // Handle error (show toast, etc.)
+      } finally {
+        setIsGenerating(false);
       }
-      if (selectedAudio) {
-        formData.append("audio", audioFiles[selectedAudio-1].url);
+    } else if (scriptSource === "file" && scriptFile) {
+      try {
+        setIsGenerating(true);
+        const form = new FormData();
+        form.append("file", scriptFile);
+        form.append("tone", selectedTone?.toString() || "0");
+        if (selectedAudio) {
+          form.append("audio", selectedAudio?.toString() || "0");
+        }
+        form.append("video", selectedTemplate?.toString() || "0");
+
+        const response = await fetch(
+          BACKEND_FILE_URL,
+          {
+            method: "POST",
+            body: form,
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Accept: "application/json",
+              "Authorization": `Bearer ${token || ""}`,
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to generate content");
+        }
+      } catch (error) {
+        console.error("Error generating content:", error);
+        // Handle error (show toast, etc.)
+      } finally {
+        setIsGenerating(false);
       }
-
-      // Log request data
-      console.log("Request Data:", {
-        prompt,
-        quality: selectedQuality,
-        overlayFormat: selectedTemplate ? videos[selectedTemplate-1].videoUrl : "none",
-        hasOverlayFile: !!overlayFile,
-        overlayFileName: overlayFile?.name,
-        overlayFileSize: overlayFile
-          ? `${(overlayFile.size / 1024 / 1024).toFixed(2)}MB`
-          : null,
-        selectedAudio: selectedAudio ? audioFiles[selectedAudio-1].name : null,
-      });
-
-      // Mock API call
-      const response = await fetch("/api/generate-content", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate content");
-      }
-
-      const data = await response.json();
-      console.log("Generated content:", data);
-
-      // Navigate to results page with the generated video data
-    } catch (error) {
-      console.error("Error generating content:", error);
-      // Handle error (show toast, etc.)
-    } finally {
-      setIsGenerating(false);
     }
   };
 
@@ -284,7 +340,8 @@ export default function PromptPage() {
                           />
                         </svg>
                         <p className="mb-2 text-sm text-muted-foreground">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
+                          <span className="font-semibold">Click to upload</span>{" "}
+                          or drag and drop
                         </p>
                         <p className="text-xs text-muted-foreground">
                           PDF or CSV (MAX. 10MB)
@@ -329,12 +386,14 @@ export default function PromptPage() {
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <span className="text-primary">Template Format</span>
               </h2>
-              <TemplateSelect templates={videos} onSelect={(id:number)=>{
-                setSelectedTemplate(id)
-                console.log(id)
-                }} selected={selectedTemplate}/>
-
-             
+              <TemplateSelect
+                templates={videos}
+                onSelect={(id: number) => {
+                  setSelectedTemplate(id);
+                  console.log(id);
+                }}
+                selected={selectedTemplate}
+              />
             </div>
           </div>
 
@@ -344,7 +403,7 @@ export default function PromptPage() {
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <span className="text-primary">Select Audio</span>
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {audioFiles.map((audio) => (
                   <div
                     key={audio.id}
@@ -364,7 +423,9 @@ export default function PromptPage() {
                         {currentlyPlaying === audio.id ? "Pause" : "Play"}
                       </Button>
                       <Button
-                        variant={selectedAudio === audio.id ? "default" : "outline"}
+                        variant={
+                          selectedAudio === audio.id ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => handleAudioSelect(audio.id)}
                       >
@@ -380,7 +441,7 @@ export default function PromptPage() {
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <span className="text-primary">Select Tone</span>
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[300px] overflow-y-auto">
                 {toneOptions.map((tone) => (
                   <div
                     key={tone.id}
@@ -398,7 +459,9 @@ export default function PromptPage() {
                         </div>
                       </div>
                       <Button
-                        variant={selectedTone === tone.id ? "default" : "outline"}
+                        variant={
+                          selectedTone === tone.id ? "default" : "outline"
+                        }
                         size="sm"
                         onClick={() => handleToneSelect(tone.id)}
                       >
@@ -409,8 +472,6 @@ export default function PromptPage() {
                 ))}
               </div>
             </div>
-
-           
           </div>
         </div>
 
@@ -419,20 +480,14 @@ export default function PromptPage() {
             className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
             size="lg"
             disabled={
-              !prompt.trim() ||
-              (selectedTemplate !== null && !overlayFile) ||
-              isGenerating
+              (!prompt.trim() && !scriptFile) ||
+              !selectedTemplate ||
+              (selectedTone==null) ||
+              !selectedTemplate
             }
             onClick={handleGenerate}
           >
             {isGenerating ? "Generating..." : "Generate Content"}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {}}
-            className="w-full hover:bg-primary/10 hover:text-primary transition-colors"
-          >
-            Back to Home
           </Button>
         </div>
       </div>
