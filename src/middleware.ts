@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)", "/prompt"]);
 
+
 export default clerkMiddleware(async (auth, context) => {
   if (isProtectedRoute(context)) {
     await auth.protect();
