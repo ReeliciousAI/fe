@@ -1,11 +1,18 @@
 import CustomSidebar from "@/components/sidebar";
-import { RBBTProvider } from "@/providers/rbbt-provider";
+import { RBBTProvider } from "rbbt-client/next";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={`antialiased`}>
-        <RBBTProvider rabbitMqConnection="wss://congen.ofneill.com:15671/ws">
+        <RBBTProvider
+          config={{
+            url: process.env.RBBT_WS_URL!,
+            vhost: process.env.RBBT_VHOST!,
+            username: process.env.RBBT_USERNAME!,
+            password: process.env.RBBT_PASSWORD!,
+          }}
+        >
           <CustomSidebar>{children}</CustomSidebar>
         </RBBTProvider>
       </body>
