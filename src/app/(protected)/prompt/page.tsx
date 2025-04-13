@@ -5,7 +5,9 @@ import { QualitySelector } from "@/components/QualitySelector";
 import { useState } from "react";
 import TemplateSelect from "@/components/TemplateSelect";
 import { useAuth } from "@clerk/nextjs";
-import { BACKEND_FILE_URL, BACKEND_PROMPT_URL } from "@/config";
+import { toast } from "sonner";
+import { BACKEND_PROMPT_URL } from "@/config";
+// import { BACKEND_FILE_URL, BACKEND_PROMPT_URL } from "@/config";
 
 const videos = [
   {
@@ -200,6 +202,7 @@ export default function PromptPage() {
     console.log(scriptSource, prompt, scriptFile, selectedTone, selectedAudio, selectedTemplate);
     if (!prompt.trim() && !scriptFile) return;
     const token = await getToken();
+    console.log(token);
     if (scriptSource === "prompt" && !scriptFile) {
       try {
         setIsGenerating(true);
@@ -209,15 +212,15 @@ export default function PromptPage() {
           audio: selectedAudio,
           video: selectedTemplate,
         };
-        // Mock API call
+        
         const response = await fetch(
           BACKEND_PROMPT_URL,
           {
-            method: "POST",
+            method: 'POST',
             headers: {
+              "Accept": "application/json",
               "Content-Type": "application/json",
-              Accept: "application/json",
-              "Authorization": `Bearer ${!token || ""}`,
+              "Authorization": `Bearer ${token || ""}`,
             },
             body: JSON.stringify(body),
           }
@@ -230,10 +233,8 @@ export default function PromptPage() {
         const data = await response.json();
         console.log("Generated content:", data);
 
-        // Navigate to results page with the generated video data
       } catch (error) {
-        console.error("Error generating content:", error);
-        // Handle error (show toast, etc.)
+        toast.error("Error generating content: " + error || "" );
       } finally {
         setIsGenerating(false);
       }
@@ -249,14 +250,14 @@ export default function PromptPage() {
         form.append("video", selectedTemplate?.toString() || "0");
 
         const response = await fetch(
-          BACKEND_FILE_URL,
+          "/api/generate/prompt",
           {
             method: "POST",
             body: form,
             headers: {
+              "Accept": "application/json",
               "Content-Type": "multipart/form-data",
-              Accept: "application/json",
-              "Authorization": `Bearer ${token || ""}`,
+              "Authorization": `bearer ${token || ""}`,
             },
           }
         );
@@ -265,7 +266,6 @@ export default function PromptPage() {
         }
       } catch (error) {
         console.error("Error generating content:", error);
-        // Handle error (show toast, etc.)
       } finally {
         setIsGenerating(false);
       }
