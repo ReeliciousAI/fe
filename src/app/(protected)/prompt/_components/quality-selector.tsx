@@ -33,7 +33,7 @@ interface QualitySelectorProps {
   onSelect: (qualityId: string) => void
 }
 
-export function QualitySelector({ selectedQuality, onSelect }: QualitySelectorProps) {
+export default function QualitySelector({ selectedQuality, onSelect }: QualitySelectorProps) {
   return (
     <div className="grid grid-cols-3 gap-2">
       {qualities.map((quality) => (
