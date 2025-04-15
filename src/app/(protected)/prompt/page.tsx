@@ -1,12 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { toast } from "sonner";
 import { BACKEND_PROMPT_URL } from "@/config";
 import { audioFiles, toneOptions, videos } from "@/lib/db";
-
-// component imports
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import QualitySelector from "@/app/(protected)/prompt/_components/quality-selector";
 import TemplateSelect from "@/app/(protected)/prompt/_components/template-select";
@@ -14,6 +11,8 @@ import ScriptPrompt from "./_components/script-prompt";
 import BackgroundAudioSelector from "./_components/background-audio-selector";
 import ToneSelector from "./_components/tone-selector";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useRBBT } from "rbbt-client/next";
+import { useUser } from "@clerk/nextjs";
 
 export default function PromptPage() {
   const { getToken } = useAuth();
@@ -25,10 +24,23 @@ export default function PromptPage() {
   const [scriptFile, setScriptFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [scriptSource, setScriptSource] = useState<"prompt" | "file">("prompt");
+  const { createDisposableQueue } = useRBBT();
+  const { user } = useUser();
 
   const handleAudioSelect = (id: number) => {
     setSelectedAudio(id);
   };
+
+  useEffect(() => {
+    if (user) {
+      const q = createDisposableQueue("user", user.id);
+      if (q) {
+        q.subscribe({ noAck: true }, (msg) => {
+          console.log(msg);
+        });
+      }
+    }
+  }, [user]);
 
   const handleToneSelect = (id: number) => {
     setSelectedTone(id);
@@ -41,7 +53,7 @@ export default function PromptPage() {
       scriptFile,
       selectedTone,
       selectedAudio,
-      selectedTemplate
+      selectedTemplate,
     );
     if (!prompt.trim() && !scriptFile) return;
     const token = await getToken();
@@ -112,8 +124,8 @@ export default function PromptPage() {
   return (
     <div className="h-full">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <h1 className="text-xl font-semibold">Create new content</h1>
+        <SidebarTrigger className="-ml-1" />
+        <h1 className="text-xl font-semibold">Create new content</h1>
       </header>
       <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-background/95">
         <div className="w-full max-w-5xl space-y-6">
