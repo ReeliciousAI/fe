@@ -7,6 +7,7 @@ import { OverlayFormatSelector } from "@/components/OverlayFormatSelector";
 import { ContentPreview } from "@/components/ContentPreview";
 import { useEffect, useState } from "react";
 import { useRBBT } from "rbbt-client/next";
+import { useUser } from "@clerk/nextjs";
 
 export default function PromptPage() {
   const [selectedLayout, setSelectedLayout] = useState("landscape");
@@ -15,17 +16,19 @@ export default function PromptPage() {
   const [prompt, setPrompt] = useState("");
   const [overlayFile, setOverlayFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const { createDisposableQueue, convertByteArrayToJSON } = useRBBT();
+  const { createDisposableQueue } = useRBBT();
+  const { user } = useUser();
 
   useEffect(() => {
-    const q = createDisposableQueue("ai", "hi");
-    if (q) {
-      q.subscribe({ noAck: true }, (msg) => {
-        const obj = convertByteArrayToJSON(msg.body as Uint8Array);
-        console.log(obj);
-      });
+    if (user) {
+      const q = createDisposableQueue("user", user.id);
+      if (q) {
+        q.subscribe({ noAck: true }, (msg) => {
+          console.log(msg);
+        });
+      }
     }
-  }, []);
+  }, [user]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
