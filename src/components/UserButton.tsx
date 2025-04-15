@@ -7,6 +7,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { SidebarMenuButton } from "./ui/sidebar";
+import { CreditCard, LogOut, User } from "lucide-react";
+
 
 export default function UserButton() {
   const { user } = useUser();
@@ -14,14 +16,14 @@ export default function UserButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <SidebarMenuButton>
+        <SidebarMenuButton size={"lg"}>
           <Avatar>
             <AvatarImage src={user?.imageUrl} alt="User profile image" />
             <AvatarFallback>
               {user?.firstName?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="truncate">
+          <div className="truncate text-sm text-stone-700 max-w-[150px]">
             {user?.primaryEmailAddress?.emailAddress}
           </div>
         </SidebarMenuButton>
@@ -33,14 +35,19 @@ export default function UserButton() {
         className="w-[--radix-popper-anchor-width]"
       >
         <DropdownMenuItem>
+          <User />
           <span>Account</span>
         </DropdownMenuItem>
         <DropdownMenuItem>
+          <CreditCard />
           <span>Billing</span>
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <SignOutButton />
-        </DropdownMenuItem>
+        <SignOutButton>
+          <DropdownMenuItem>
+            <LogOut />
+            <span>Sign Out</span>
+          </DropdownMenuItem>
+        </SignOutButton>
       </DropdownMenuContent>
     </DropdownMenu>
   );

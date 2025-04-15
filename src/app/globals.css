@@ -3,10 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-body, html {
-  @apply bg-blue-200;
-}
-
 @theme inline {
 
   --radius-sm: calc(var(--radius) - 4px);

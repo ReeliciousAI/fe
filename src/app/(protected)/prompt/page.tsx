@@ -13,6 +13,7 @@ import TemplateSelect from "@/app/(protected)/prompt/_components/template-select
 import ScriptPrompt from "./_components/script-prompt";
 import BackgroundAudioSelector from "./_components/background-audio-selector";
 import ToneSelector from "./_components/tone-selector";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function PromptPage() {
   const { getToken } = useAuth();
@@ -58,8 +59,8 @@ export default function PromptPage() {
           method: "POST",
           headers: {
             Accept: "application/json",
-            "Content-Type":"application/json",
-            Authorization: `Bearer ${token || ""}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token || ""}`,
           },
           body: JSON.stringify(body),
         };
@@ -109,100 +110,97 @@ export default function PromptPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-svh p-6 bg-gradient-to-b from-background to-background/95">
-      <div className="w-full max-w-5xl space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            Create Your Content
-          </h1>
-          <p className="text-muted-foreground">
-            Generate amazing videos with AI
-          </p>
-        </div>
+    <div className="h-full">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <h1 className="text-xl font-semibold">Create new content</h1>
+      </header>
+      <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-background/95">
+        <div className="w-full max-w-5xl space-y-6">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Left column - Prompt and Options */}
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <span className="text-primary">Script Source</span>
+                </h2>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Left column - Prompt and Options */}
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <span className="text-primary">Script Source</span>
-              </h2>
+                <ScriptPrompt
+                  prompt={prompt}
+                  scriptFile={scriptFile}
+                  scriptSource={scriptSource}
+                  setPrompt={setPrompt}
+                  setScriptFile={setScriptFile}
+                  setScriptSource={setScriptSource}
+                />
+              </div>
 
-              <ScriptPrompt
-                prompt={prompt}
-                scriptFile={scriptFile}
-                scriptSource={scriptSource}
-                setPrompt={setPrompt}
-                setScriptFile={setScriptFile}
-                setScriptSource={setScriptSource}
-              />
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <span className="text-primary">Quality Level</span>
+                </h2>
+                <QualitySelector
+                  selectedQuality={selectedQuality}
+                  onSelect={setSelectedQuality}
+                />
+              </div>
+
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <span className="text-primary">Template Format</span>
+                </h2>
+                <TemplateSelect
+                  templates={videos}
+                  onSelect={(id: number) => {
+                    setSelectedTemplate(id);
+                    console.log(id);
+                  }}
+                  selected={selectedTemplate}
+                />
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <span className="text-primary">Quality Level</span>
-              </h2>
-              <QualitySelector
-                selectedQuality={selectedQuality}
-                onSelect={setSelectedQuality}
-              />
-            </div>
+            {/* Right column - Audio and Preview */}
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <span className="text-primary">Background Audio</span>
+                </h2>
+                <BackgroundAudioSelector
+                  audioFiles={audioFiles}
+                  selectedAudio={selectedAudio}
+                  handleAudioSelect={handleAudioSelect}
+                />
+              </div>
 
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <span className="text-primary">Template Format</span>
-              </h2>
-              <TemplateSelect
-                templates={videos}
-                onSelect={(id: number) => {
-                  setSelectedTemplate(id);
-                  console.log(id);
-                }}
-                selected={selectedTemplate}
-              />
-            </div>
-          </div>
-
-          {/* Right column - Audio and Preview */}
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <span className="text-primary">Background Audio</span>
-              </h2>
-              <BackgroundAudioSelector
-                audioFiles={audioFiles}
-                selectedAudio={selectedAudio}
-                handleAudioSelect={handleAudioSelect}
-              />
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <span className="text-primary">Select Tone</span>
-              </h2>
-              <ToneSelector
-                toneOptions={toneOptions}
-                selectedTone={selectedTone}
-                handleToneSelect={handleToneSelect}
-              />
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <span className="text-primary">Select Tone</span>
+                </h2>
+                <ToneSelector
+                  toneOptions={toneOptions}
+                  selectedTone={selectedTone}
+                  handleToneSelect={handleToneSelect}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-3 pt-2">
-          <Button
-            className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
-            size="lg"
-            disabled={
-              (!prompt.trim() && !scriptFile) ||
-              !selectedTemplate ||
-              selectedTone == null ||
-              !selectedTemplate
-            }
-            onClick={handleGenerate}
-          >
-            {isGenerating ? "Generating..." : "Generate Content"}
-          </Button>
+          <div className="flex flex-col gap-3 pt-2">
+            <Button
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all"
+              size="lg"
+              disabled={
+                (!prompt.trim() && !scriptFile) ||
+                !selectedTemplate ||
+                selectedTone == null ||
+                !selectedTemplate
+              }
+              onClick={handleGenerate}
+            >
+              {isGenerating ? "Generating..." : "Generate Content"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
