@@ -11,49 +11,65 @@ export default function VideoEditor() {
       tracks: [
         {
           clips: [
-            {
-              asset: {
-                type: "caption",
-                src: subtitle,
-              },
-              start: 0,
-              length: "end",
-            },
-            {
-              length: "auto",
-              asset: {
-                type: "video",
-                src: video,
-                volume: 0,
-              },
-              start: 0,
-              fit: "none",
-            },
-          ],
+            ...(subtitle
+              ? [
+                  {
+                    asset: {
+                      type: "caption",
+                      src: subtitle,
+                    },
+                    start: 0,
+                    length: "end",
+                  },
+                ]
+              : []),
+            ...(video
+              ? [
+                  {
+                    length: "auto",
+                    asset: {
+                      type: "video",
+                      src: video,
+                      volume: 0,
+                    },
+                    start: 0,
+                    fit: "none",
+                  },
+                ]
+              : []),
+          ].filter(Boolean),
         },
         {
           clips: [
-            {
-              length: "auto",
-              asset: {
-                type: "audio",
-                src: audio,
-                volume: 1,
-              },
-              start: 0,
-              alias: "f7a65212",
-            },
-            {
-              length: "auto",
-              asset: {
-                type: "audio",
-                src: voice,
-                volume: 1,
-              },
-              start: 0,
-              alias: "f7a62312",
-            },
-          ],
+            ...(audio
+              ? [
+                  {
+                    length: "auto",
+                    asset: {
+                      type: "audio",
+                      src: audio,
+                      volume: 1,
+                    },
+                    start: 0,
+                    alias: "f7a65212",
+                  },
+                ]
+              : []),
+            ...(voice
+              ? [
+                  {
+                    length: "auto",
+                    asset: {
+                      type: "audio",
+                      src: voice,
+                      volume: 1,
+                    },
+                    start: 0,
+                    alias: "f7a62312",
+                  },
+                ]
+              : []),
+          ].filter(Boolean),
         },
       ],
     },
@@ -73,7 +89,6 @@ export default function VideoEditor() {
       },
     ],
   };
-
   return (
     <div className="w-full h-full">
       <ShotstackStudio
