@@ -14,6 +14,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useRBBT } from "rbbt-client/next";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { useMediaStore } from "@/store/mediaStore";
+import { useRouter } from "next/navigation";
 
 export default function PromptPage() {
   const { getToken } = useAuth();
@@ -27,6 +29,8 @@ export default function PromptPage() {
   const [scriptSource, setScriptSource] = useState<"prompt" | "file">("prompt");
   const { createDisposableQueue } = useRBBT();
   const { user } = useUser();
+  const { setMedia } = useMediaStore();
+  const router = useRouter();
 
   const handleAudioSelect = (id: number) => {
     setSelectedAudio(id);
@@ -37,7 +41,25 @@ export default function PromptPage() {
       const q = createDisposableQueue("user", user.id);
       if (q) {
         q.subscribe({ noAck: true }, (msg) => {
-          console.log(msg);
+          const obj = msg.body as {
+            audio: string;
+            voice: string;
+            subtitle: string;
+            video: string;
+          };
+
+          setMedia(obj);
+
+          toast("Video has finished generating", {
+            description:
+              "Your video has now completed generating click to go to video",
+            action: {
+              label: "View",
+              onClick: () => {
+                router.push("/video-editor");
+              },
+            },
+          });
         });
       }
     }

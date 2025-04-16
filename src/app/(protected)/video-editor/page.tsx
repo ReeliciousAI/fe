@@ -1,8 +1,10 @@
 "use client";
 
 import ShotstackStudio from "@/components/ShotStackStudio";
+import { useMediaStore } from "@/store/mediaStore";
 
 export default function VideoEditor() {
+  const { audio, video, subtitle, voice } = useMediaStore();
   const template = {
     timeline: {
       background: "#000000",
@@ -12,7 +14,7 @@ export default function VideoEditor() {
             {
               asset: {
                 type: "caption",
-                src: "https://shotstack-assets.s3.amazonaws.com/captions/transcript.srt",
+                src: subtitle,
               },
               start: 0,
               length: "end",
@@ -21,7 +23,7 @@ export default function VideoEditor() {
               length: "auto",
               asset: {
                 type: "video",
-                src: "https://shotstack-ingest-api-v1-sources.s3.ap-southeast-2.amazonaws.com/s7pbgh87aw/zzz01jrx-kjvw1-jn91z-68bhv-16wh2h/source.mp4",
+                src: video,
                 volume: 0,
               },
               start: 0,
@@ -35,11 +37,21 @@ export default function VideoEditor() {
               length: "auto",
               asset: {
                 type: "audio",
-                src: "https://shotstack-ingest-api-v1-sources.s3.ap-southeast-2.amazonaws.com/s7pbgh87aw/zzz01jrx-kh04v-cj3p2-vamq3-j6ctdw/source.mp3",
+                src: audio,
                 volume: 1,
               },
               start: 0,
               alias: "f7a65212",
+            },
+            {
+              length: "auto",
+              asset: {
+                type: "audio",
+                src: voice,
+                volume: 1,
+              },
+              start: 0,
+              alias: "f7a62312",
             },
           ],
         },
