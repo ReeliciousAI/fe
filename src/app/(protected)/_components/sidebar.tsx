@@ -11,7 +11,6 @@ import {
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
-  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarProvider,
@@ -31,7 +30,7 @@ const dashboard_items = [
     url: "/gallery",
     icon: Album,
   },
-]
+];
 
 export default function CustomSidebar({
   children,
@@ -44,30 +43,30 @@ export default function CustomSidebar({
     <SidebarProvider open={open} onOpenChange={setOpen}>
       <Sidebar>
         <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard" className="flex items-center gap-2">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Sparkles className="size-4" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">ConGen.Ai</span>
-                  <span className="text-xs text-muted-foreground">AI-powered content</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <a href="/dashboard" className="flex items-center gap-2">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <div className="flex flex-col gap-0.5 leading-none">
+                    <span className="font-semibold">ConGen.Ai</span>
+                    <span className="text-xs text-muted-foreground">
+                      AI-powered content
+                    </span>
+                  </div>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton variant={'action'} size={'thick'} asChild>
-                  <Link href={"/prompt"}>
-                    Create New
-                  </Link>
+                <SidebarMenuButton variant={"action"} size={"thick"} asChild>
+                  <Link href={"/prompt"}>Create New</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -94,9 +93,7 @@ export default function CustomSidebar({
           <UserButton />
         </SidebarFooter>
       </Sidebar>
-      <SidebarInset>
-        {children}
-      </SidebarInset>
+      <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
 }
