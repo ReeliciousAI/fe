@@ -87,7 +87,7 @@ export default function PromptPage() {
           prompt,
           tone: selectedTone,
           audio: selectedAudio,
-          video: selectedTemplate,
+          video: videos.find((video) => video.id === selectedTemplate),
         };
 
         const request: RequestInit = {
