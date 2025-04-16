@@ -68,7 +68,6 @@ export default function VideoEditor() {
         template={template}
         onReady={() => console.log("Editor ready")}
         onError={(error) => console.error(error)}
-        onTimeUpdate={(time) => console.log("Current time:", time)}
       />
     </div>
   );
