@@ -10,7 +10,7 @@ interface Size {
 interface Template {
   timeline: {
     background: string;
-    tracks: any[];
+    tracks: object[];
     fonts?: { src: string }[];
   };
   output: {
@@ -19,11 +19,33 @@ interface Template {
   };
 }
 
+interface StudioOptions {
+  owner: string;
+  interactive?: boolean;
+  timeline?: boolean;
+  sidepanel?: boolean;
+  settings?: boolean;
+  controls?: boolean;
+  style?: {
+    logo?: {
+      url: string;
+    };
+    stylesheet?: string;
+  };
+}
+
+interface StudioInstance {
+  play: () => void;
+  pause: () => void;
+  stop: () => void;
+  seek: (time: number) => void;
+  destroy?: () => void;
+}
+
 interface ShotstackStudioProps {
   template: Template;
   onReady?: () => void;
   onError?: (error: Error) => void;
-  onTimeUpdate?: (time: number) => void;
 }
 
 declare global {
@@ -32,33 +54,26 @@ declare global {
       create: (
         elementId: string,
         template: Template,
-        options: {
-          owner: string;
-          interactive?: boolean;
-          timeline?: boolean;
-          sidepanel?: boolean;
-          settings?: boolean;
-          controls?: boolean;
-          style?: {
-            logo?: {
-              url: string;
-            };
-            stylesheet?: string;
-          };
-        },
-      ) => void;
+        options: StudioOptions,
+      ) => StudioInstance;
     };
   }
+}
+
+export interface StudioControls {
+  play: () => void;
+  pause: () => void;
+  stop: () => void;
+  seek: (time: number) => void;
 }
 
 export default function ShotstackStudio({
   template,
   onReady,
   onError,
-  onTimeUpdate,
 }: ShotstackStudioProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const studioInstanceRef = useRef<any>(null);
+  const studioInstanceRef = useRef<StudioInstance | null>(null);
 
   useEffect(() => {
     let scriptElement: HTMLScriptElement | null = null;
@@ -69,7 +84,7 @@ export default function ShotstackStudio({
       const editorContainer = document.getElementById("shotstack-editor");
       if (!editorContainer) return;
 
-      observer = new MutationObserver((mutations) => {
+      observer = new MutationObserver(() => {
         const iframes = editorContainer.getElementsByTagName("iframe");
         if (iframes.length > 1) {
           // Keep only the first iframe
@@ -120,7 +135,7 @@ export default function ShotstackStudio({
         onReady?.();
       } catch (error) {
         console.error("Error initializing Shotstack Studio:", error);
-        onError?.(error as Error);
+        onError?.(error instanceof Error ? error : new Error(String(error)));
       }
     };
 
@@ -128,15 +143,15 @@ export default function ShotstackStudio({
     script.src = "https://js.shotstack.io/studio/0.5.6/shotstack.min.js";
     script.async = true;
     script.onload = initializeStudio;
-    script.onerror = (error) => onError?.(error as Error);
+    script.onerror = (error) => {
+      onError?.(error instanceof Error ? error : new Error(String(error)));
+    };
     document.body.appendChild(script);
     scriptElement = script;
 
     return () => {
       // Disconnect the observer
-      if (observer) {
-        observer.disconnect();
-      }
+      observer?.disconnect();
       // Clean up the instance
       if (studioInstanceRef.current) {
         try {
@@ -152,15 +167,8 @@ export default function ShotstackStudio({
     };
   }, [template, onReady, onError]);
 
-  const studioControls = {
-    play: () => studioInstanceRef.current?.play?.(),
-    pause: () => studioInstanceRef.current?.pause?.(),
-    stop: () => studioInstanceRef.current?.stop?.(),
-    seek: (time: number) => studioInstanceRef.current?.seek?.(time),
-  };
-
   return (
-    <div className="shotstack-studio-container">
+    <div className="!h-full !w-full">
       {isLoading && (
         <div className="loading-overlay">
           <div className="loading-spinner">Loading editor...</div>
@@ -168,9 +176,8 @@ export default function ShotstackStudio({
       )}
       <div
         id="shotstack-editor"
-        style={{ width: "100%", height: "100%" }}
+        className="!h-full !w-full [&>iframe]:!h-full"
       ></div>
     </div>
   );
 }
-export type StudioControls = typeof studioControls;
