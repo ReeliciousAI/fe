@@ -13,6 +13,7 @@ import ToneSelector from "./_components/tone-selector";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useRBBT } from "rbbt-client/next";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 export default function PromptPage() {
   const { getToken } = useAuth();
@@ -70,12 +71,13 @@ export default function PromptPage() {
         const request: RequestInit = {
           method: "POST",
           headers: {
-            Accept: "application/json",
             "Content-Type": "application/json",
             Authorization: `Bearer ${token || ""}`,
           },
           body: JSON.stringify(body),
         };
+
+        console.log(request);
 
         const response = await fetch(BACKEND_PROMPT_URL, request);
 
