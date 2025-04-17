@@ -113,12 +113,12 @@ export default function PromptPage() {
   };
 
   return (
-    <div className="h-full">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+    <div className="h-full flex flex-col">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 bg-white z-50">
         <SidebarTrigger className="-ml-1" />
         <h1 className="text-xl font-semibold">Create new content</h1>
       </header>
-      <div className="flex flex-col items-center justify-center p-6 bg-gradient-to-b from-background to-background/95">
+      <div className="flex flex-col overflow-auto items-center justify-center p-6 bg-gradient-to-b from-background to-background/95">
         <div className="w-full max-w-5xl space-y-6">
           <div className="grid md:grid-cols-2 gap-8">
             {/* Left column - Prompt and Options */}
