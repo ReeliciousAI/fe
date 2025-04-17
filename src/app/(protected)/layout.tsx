@@ -1,4 +1,5 @@
 import CustomSidebar from "@/app/(protected)/_components/sidebar";
+import { RabbitQListener } from "@/providers/rabbit-queue-listener";
 import { ClerkProvider } from "@clerk/nextjs";
 import { RBBTProvider } from "rbbt-client/next";
 import { Toaster } from "sonner";
@@ -16,8 +17,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               password: process.env.RBBT_PASSWORD!,
             }}
           >
-            <CustomSidebar>{children}</CustomSidebar>
-            <Toaster />
+            <RabbitQListener>
+              <CustomSidebar>{children}</CustomSidebar>
+              <Toaster />
+            </RabbitQListener>
           </RBBTProvider>
         </ClerkProvider>
       </body>

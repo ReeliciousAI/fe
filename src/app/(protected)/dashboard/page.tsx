@@ -11,49 +11,10 @@ import {
 } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useMediaStore } from "@/store/mediaStore";
-import { useUser } from "@clerk/nextjs";
 import { FileVideo } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRBBT } from "rbbt-client/next";
-import { useEffect } from "react";
-import { toast } from "sonner";
 
 export default function DashboardPage() {
-  const { createDisposableQueue } = useRBBT();
-  const { user } = useUser();
-  const { setMedia } = useMediaStore();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (user) {
-      const q = createDisposableQueue("user", user.id);
-      if (q) {
-        q.subscribe({ noAck: true }, (msg) => {
-          const obj = msg.body as {
-            audio: string;
-            voice: string;
-            subtitle: string;
-            video: string;
-          };
-
-          setMedia(obj);
-
-          toast("Video has finished generating", {
-            description:
-              "Your video has now completed generating click to go to video",
-            action: {
-              label: "View",
-              onClick: () => {
-                router.push("/video-editor");
-              },
-            },
-          });
-        });
-      }
-    }
-  }, [user]);
 
   return (
     <div>
