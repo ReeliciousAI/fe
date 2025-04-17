@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { BACKEND_PROMPT_URL } from "@/config";
 import { audioFiles, toneOptions, videos } from "@/lib/db";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import QualitySelector from "@/app/(protected)/prompt/_components/quality-selector";
 import TemplateSelect from "@/app/(protected)/prompt/_components/template-select";
@@ -11,11 +11,9 @@ import ScriptPrompt from "./_components/script-prompt";
 import BackgroundAudioSelector from "./_components/background-audio-selector";
 import ToneSelector from "./_components/tone-selector";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useRBBT } from "rbbt-client/next";
-import { useUser } from "@clerk/nextjs";
+
 import { toast } from "sonner";
-import { useMediaStore } from "@/store/mediaStore";
-import { useRouter } from "next/navigation";
+
 
 export default function PromptPage() {
   const { getToken } = useAuth();
@@ -27,43 +25,11 @@ export default function PromptPage() {
   const [scriptFile, setScriptFile] = useState<File | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [scriptSource, setScriptSource] = useState<"prompt" | "file">("prompt");
-  const { createDisposableQueue } = useRBBT();
-  const { user } = useUser();
-  const { setMedia } = useMediaStore();
-  const router = useRouter();
 
   const handleAudioSelect = (id: number) => {
     setSelectedAudio(id);
   };
 
-  useEffect(() => {
-    if (user) {
-      const q = createDisposableQueue("user", user.id);
-      if (q) {
-        q.subscribe({ noAck: true }, (msg) => {
-          const obj = msg.body as {
-            audio: string;
-            voice: string;
-            subtitle: string;
-            video: string;
-          };
-
-          setMedia(obj);
-
-          toast("Video has finished generating", {
-            description:
-              "Your video has now completed generating click to go to video",
-            action: {
-              label: "View",
-              onClick: () => {
-                router.push("/video-editor");
-              },
-            },
-          });
-        });
-      }
-    }
-  }, [user]);
 
   const handleToneSelect = (id: number) => {
     setSelectedTone(id);
