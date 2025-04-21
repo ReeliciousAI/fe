@@ -1,8 +1,8 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { BACKEND_PROMPT_URL } from "@/config";
-import { audioFiles, toneOptions, videos } from "@/lib/db";
+import { BACKEND_PROMPT_URL, BACKEND_SERVICE_URL } from "@/config";
+import { audioFiles, toneOptions } from "@/lib/db";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import QualitySelector from "@/app/(protected)/prompt/_components/quality-selector";
@@ -13,10 +13,29 @@ import ToneSelector from "./_components/tone-selector";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+
 
 
 export default function PromptPage() {
   const { getToken } = useAuth();
+
+  const { data: videos, isLoading:videosLoading } = useQuery({
+    queryKey: ["template"],
+    queryFn: async () => {
+      const token = await getToken();
+      const res = await fetch(BACKEND_SERVICE_URL+"?type=1", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error(res.statusText);
+      const data = await res.json();
+      console.log({ data });
+      return data;
+    },
+  });
+
   const [selectedAudio, setSelectedAudio] = useState<number | null>(null);
   const [selectedTone, setSelectedTone] = useState<number | null>(null);
   const [selectedQuality, setSelectedQuality] = useState("standard");
@@ -30,7 +49,6 @@ export default function PromptPage() {
     setSelectedAudio(id);
   };
 
-
   const handleToneSelect = (id: number) => {
     setSelectedTone(id);
   };
@@ -42,7 +60,7 @@ export default function PromptPage() {
       scriptFile,
       selectedTone,
       selectedAudio,
-      selectedTemplate,
+      selectedTemplate
     );
     if (!prompt.trim() && !scriptFile) return;
     const token = await getToken();
@@ -53,7 +71,7 @@ export default function PromptPage() {
           prompt,
           tone: selectedTone,
           audio: audioFiles.find((audio) => audio.id === selectedAudio)?.url,
-          video: videos.find((video) => video.id === selectedTemplate)
+          video: videos.serviceData.find((video) => video.id === selectedTemplate)
             ?.videoUrl,
         };
 
