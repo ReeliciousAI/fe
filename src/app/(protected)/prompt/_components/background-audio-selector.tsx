@@ -1,22 +1,21 @@
 import { Button } from "@/components/ui/button";
+import { ServiceFile } from "@/types/responses";
 import { useState } from "react";
+import { BarLoader } from "react-spinners";
 
-type AudioFile = {
-  id: number;
-  name: string;
-  url: string;
-};
 
 interface IBackgroundAudioSelector {
-  audioFiles: AudioFile[];
-  selectedAudio: number | null;
-  handleAudioSelect: (id:number) => void;
+  audioFiles?: ServiceFile[];
+  loading: boolean,
+  selected: number | null;
+  onSelect: (id:number) => void;
 }
 
 export default function BackgroundAudioSelector({
   audioFiles,
-  selectedAudio,
-  handleAudioSelect
+  loading,
+  selected,
+  onSelect
 }: IBackgroundAudioSelector) {
   const [currentlyPlaying, setCurrentlyPlaying] = useState<number | null>(null);
   const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
@@ -46,16 +45,17 @@ export default function BackgroundAudioSelector({
   };
   return (
     <div className="space-y-2 max-h-[300px] overflow-y-auto">
-      {audioFiles.map((audio) => (
+      {loading && <BarLoader/>}
+      {audioFiles?.map((audio) => (
         <div
           key={audio.id}
           className={`flex items-center justify-between p-3 rounded-md border ${
-            selectedAudio === audio.id
+            selected === audio.id
               ? "border-primary bg-primary/10"
               : "border-input"
           }`}
         >
-          <span className="text-sm">{audio.name}</span>
+          <span className="text-sm">{audio.title}</span>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -65,9 +65,9 @@ export default function BackgroundAudioSelector({
               {currentlyPlaying === audio.id ? "Pause" : "Play"}
             </Button>
             <Button
-              variant={selectedAudio === audio.id ? "default" : "outline"}
+              variant={selected === audio.id ? "default" : "outline"}
               size="sm"
-              onClick={() => handleAudioSelect(audio.id)}
+              onClick={() => onSelect(audio.id)}
             >
               Select
             </Button>

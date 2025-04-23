@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { BACKEND_PROMPT_URL, BACKEND_SERVICE_URL } from "@/config";
-import { audioFiles, toneOptions } from "@/lib/db";
+import { toneOptions } from "@/lib/db";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import QualitySelector from "@/app/(protected)/prompt/_components/quality-selector";
@@ -14,7 +14,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-
+import { BaseResponse, ServiceFile, ServiceResponse } from "@/types/responses";
 
 
 export default function PromptPage() {
@@ -29,10 +29,38 @@ export default function PromptPage() {
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!res.ok) throw new Error(res.statusText);
-      const data = await res.json();
-      console.log({ data });
-      return data;
+      if (!res.ok) {
+        toast.error(res.statusText);
+        return 
+      }
+      const data: ServiceResponse = await res.json();
+      if (!data.isSuccessful) {
+        toast.error("Failed to fetch video templates")
+        return
+      }
+      return data.serviceData;
+    },
+  });
+
+  const { data: audios, isLoading:audiosLoading } = useQuery({
+    queryKey: ["audio"],
+    queryFn: async () => {
+      const token = await getToken();
+      const res = await fetch(BACKEND_SERVICE_URL+"?type=3", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        toast.error(res.statusText);
+        return 
+      }
+      const data:ServiceResponse = await res.json();
+      if (!data.isSuccessful) {
+        toast.error("Failed to fetch background audio")
+        return
+      }
+      return data.serviceData;
     },
   });
 
@@ -54,15 +82,8 @@ export default function PromptPage() {
   };
 
   const handleGenerate = async () => {
-    console.log(
-      scriptSource,
-      prompt,
-      scriptFile,
-      selectedTone,
-      selectedAudio,
-      selectedTemplate
-    );
-    if (!prompt.trim() && !scriptFile) return;
+    
+    if (!prompt.trim() && !scriptFile && !selectedAudio && !selectedTemplate && !audios && !videos ) return;
     const token = await getToken();
     if (scriptSource === "prompt" && !scriptFile) {
       try {
@@ -70,9 +91,8 @@ export default function PromptPage() {
         const body = {
           prompt,
           tone: selectedTone,
-          audio: audioFiles.find((audio) => audio.id === selectedAudio)?.url,
-          video: videos.serviceData.find((video) => video.id === selectedTemplate)
-            ?.videoUrl,
+          audio: audios!.find((audio:ServiceFile) => audio.id === selectedAudio)?.url,
+          video: videos!.find((video:ServiceFile) => video.id === selectedTemplate)?.url,
         };
 
         const request: RequestInit = {
@@ -92,8 +112,11 @@ export default function PromptPage() {
           throw new Error("Failed to generate content");
         }
 
-        const data = await response.json();
-        console.log("Generated content:", data);
+        const data:BaseResponse = await response.json();
+        if (!data.isSuccessful) {
+          throw new Error(data.errorMessage? data.errorMessage : "Something went wrong")
+        }
+
       } catch (error) {
         toast.error("Error generating content: " + error || "");
       } finally {
@@ -103,6 +126,7 @@ export default function PromptPage() {
       try {
         setIsGenerating(true);
         const form = new FormData();
+
         form.append("file", scriptFile);
         form.append("tone", selectedTone?.toString() || "0");
         if (selectedAudio) {
@@ -110,7 +134,7 @@ export default function PromptPage() {
         }
         form.append("video", selectedTemplate?.toString() || "0");
 
-        const response = await fetch("/api/generate/prompt", {
+        const request: RequestInit = {
           method: "POST",
           body: form,
           headers: {
@@ -118,7 +142,10 @@ export default function PromptPage() {
             "Content-Type": "multipart/form-data",
             Authorization: `bearer ${token || ""}`,
           },
-        });
+        }
+
+        const response = await fetch("/api/generate/prompt", request);
+
         if (!response.ok) {
           throw new Error("Failed to generate content");
         }
@@ -172,11 +199,9 @@ export default function PromptPage() {
                 </h2>
                 <TemplateSelect
                   templates={videos}
-                  onSelect={(id: number) => {
-                    setSelectedTemplate(id);
-                    console.log(id);
-                  }}
+                  loading={videosLoading}
                   selected={selectedTemplate}
+                  onSelect={setSelectedTemplate}
                 />
               </div>
             </div>
@@ -188,9 +213,10 @@ export default function PromptPage() {
                   <span className="text-primary">Background Audio</span>
                 </h2>
                 <BackgroundAudioSelector
-                  audioFiles={audioFiles}
-                  selectedAudio={selectedAudio}
-                  handleAudioSelect={handleAudioSelect}
+                  audioFiles={audios}
+                  loading={audiosLoading}
+                  selected={selectedAudio}
+                  onSelect={handleAudioSelect}
                 />
               </div>
 
