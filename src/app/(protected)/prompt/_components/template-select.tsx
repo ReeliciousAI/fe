@@ -40,7 +40,7 @@ const TemplateSelect = ({
     <div className="flex overflow-x-auto space-x-4 p-4">
       {loading && <BarLoader />}
       {templates?.map((video, index) => (
-        <div key={index} className={cn("flex-none w-16 aspect-[3/5] rounded overflow-hidden shadow-md",selected== video.id && "outline-4 outline-fuchsia-500")} onClick={()=>onSelect(video.id)}>
+        <div key={index} className={cn("flex-none w-16 aspect-[3/5] rounded hover:outline-2 hover:outline-stone-600 overflow-hidden shadow-md",selected== video.id && "outline-4 outline-stone-800")} onClick={()=>onSelect(video.id)}>
           <video
             ref={(el) => {
               if (el) videoRefs.current[index] = el;

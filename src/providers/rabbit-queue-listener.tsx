@@ -20,13 +20,28 @@ export function RabbitQListener({ children }: { children: ReactNode }) {
       q = createDisposableQueue("user", user.id);
       if (q) {
         q.subscribe({ noAck: true }, (msg) => {
-          const obj = msg.body as unknown as {
+          console.log(msg)
+          if (!msg.body) return
+          if (typeof msg.body != 'object') return
+          
+          const obj =  'error' in msg.body 
+          ? msg.body as unknown as {
+            error: string,
+            message:string
+          } 
+          : msg.body as unknown as {
             audio: string;
             voice: string;
             subtitle: string;
             video: string;
           };
 
+          if ('error' in obj ) {
+            toast.error(obj.error, {
+              description: obj.message
+            })
+            return;
+          }
           setMedia(obj);
 
           toast("Video has finished generating", {
