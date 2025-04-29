@@ -4,6 +4,31 @@ export interface BaseResponse {
   errorCode: number;
 }
 
+export interface PromptResponse extends BaseResponse {
+  projectId: number;
+}
+
+export type Project = {
+  id : number;
+  title : string;
+  status : string;
+  creatorId : string;
+  audioUrl : string;
+  videoUrl : string;
+  ttsUrl? : string;
+  prompt? : string;
+  captionsUrl? : string;
+}
+
+export interface ProjectReponse extends BaseResponse {
+  projectData: Project
+}
+
+export interface ProjectsReponse extends BaseResponse {
+  projectsData: Project[]
+}
+
+
 export type ServiceFile = {
   id: number;
   url: string;

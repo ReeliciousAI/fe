@@ -14,10 +14,12 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { BaseResponse, ServiceFile, ServiceResponse } from "@/types/responses";
+import { BaseResponse, PromptResponse, ServiceFile, ServiceResponse } from "@/types/responses";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
 
 export default function PromptPage() {
+  const router = useRouter();
   const { getToken } = useAuth();
 
   const { data: videos, isLoading: videosLoading } = useQuery({
@@ -31,12 +33,12 @@ export default function PromptPage() {
       });
       if (!res.ok) {
         toast.error(res.statusText);
-        return;
+        return null;
       }
       const data: ServiceResponse = await res.json();
       if (!data.isSuccessful) {
-        toast.error("Failed to fetch video templates");
-        return;
+        toast.error(`Failed to fetch video templates: ${data.errorMessage}`);
+        return null;
       }
       return data.serviceData;
     },
@@ -53,12 +55,12 @@ export default function PromptPage() {
       });
       if (!res.ok) {
         toast.error(res.statusText);
-        return;
+        return null;
       }
       const data: ServiceResponse = await res.json();
       if (!data.isSuccessful) {
-        toast.error("Failed to fetch background audio");
-        return;
+        toast.error(`Failed to fetch background audio: ${data.errorMessage}`);
+        return null;
       }
       return data.serviceData;
     },
@@ -123,12 +125,14 @@ export default function PromptPage() {
           throw new Error("Failed to generate content");
         }
 
-        const data: BaseResponse = await response.json();
+        const data: PromptResponse = await response.json();
         if (!data.isSuccessful) {
           throw new Error(
             data.errorMessage ? data.errorMessage : "Something went wrong"
           );
         }
+        router.push(`/projects/${data.projectId}`)
+        
       } catch (error) {
         toast.error("Error generating content: " + error || "");
       } finally {
@@ -161,6 +165,7 @@ export default function PromptPage() {
         if (!response.ok) {
           throw new Error("Failed to generate content");
         }
+        
       } catch (error) {
         toast.error("Error generating content: " + error || "");
       } finally {

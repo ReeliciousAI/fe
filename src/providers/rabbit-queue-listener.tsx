@@ -2,6 +2,7 @@
 
 import { useMediaStore } from "@/store/mediaStore";
 import { useUser } from "@clerk/nextjs";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { RBBTQueue } from "rbbt-client";
 import { useRBBT } from "rbbt-client/next";
@@ -10,6 +11,7 @@ import { toast } from "sonner";
 
 export function RabbitQListener({ children }: { children: ReactNode }) {
   const { createDisposableQueue } = useRBBT();
+  const queryClient = useQueryClient()
   const { setMedia } = useMediaStore();
   const { user } = useUser();
   const router = useRouter();
@@ -30,10 +32,7 @@ export function RabbitQListener({ children }: { children: ReactNode }) {
             message:string
           } 
           : msg.body as unknown as {
-            audio: string;
-            voice: string;
-            subtitle: string;
-            video: string;
+            id: number
           };
 
           if ('error' in obj ) {
@@ -42,8 +41,8 @@ export function RabbitQListener({ children }: { children: ReactNode }) {
             })
             return;
           }
-          setMedia(obj);
-
+          // setMedia(obj);
+          queryClient.invalidateQueries({ queryKey: ['project', obj.id] })
           toast("Video has finished generating", {
             description:
               "Your video has now completed generating click to go to video",

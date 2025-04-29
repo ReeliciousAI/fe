@@ -26,8 +26,8 @@ const dashboard_items = [
     icon: LayoutDashboardIcon,
   },
   {
-    title: "Gallery",
-    url: "/gallery",
+    title: "Projects",
+    url: "/projects",
     icon: Album,
   },
 ];
