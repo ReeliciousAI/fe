@@ -17,6 +17,10 @@ export function RabbitQListener({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    const refetch = async (id: number) => {
+      await queryClient.invalidateQueries({ queryKey: ['project', id] })
+      await queryClient.refetchQueries({ queryKey: ['project', id], type:'all' });
+    }
     let q: RBBTQueue | undefined = undefined;
     if (user) {
       q = createDisposableQueue("user", user.id);
@@ -42,7 +46,7 @@ export function RabbitQListener({ children }: { children: ReactNode }) {
             return;
           }
           // setMedia(obj);
-          queryClient.invalidateQueries({ queryKey: ['project', obj.id] })
+          refetch(obj.id)
           toast("Video has finished generating", {
             description:
               "Your video has now completed generating click to go to video",

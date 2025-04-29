@@ -17,9 +17,9 @@ export default function ProjectIdPage() {
   const { setMedia } = useMediaStore();
   const { getToken } = useAuth();
   const router = useRouter();
-
+  
   const { data: project, isLoading: projectLoading } = useQuery({
-    queryKey: ["project", projectId],
+    queryKey: ["project", parseInt(projectId ? projectId?.toString(): "0")],
     queryFn: async () => {
       const token = await getToken();
       const res = await fetch(
