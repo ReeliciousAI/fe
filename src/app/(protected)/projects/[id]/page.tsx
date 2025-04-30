@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BACKEND_PROJECTS_URL } from "@/config";
+import { useConfirmDelete } from "@/hooks/use-confirm-delete";
 import { useMediaStore } from "@/store/mediaStore";
-import { ProjectReponse } from "@/types/responses";
+import { ProjectDeleteResponse, ProjectReponse } from "@/types/responses";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -18,7 +19,7 @@ export default function ProjectIdPage() {
   const { getToken } = useAuth();
   const router = useRouter();
   
-  const { data: project, isLoading: projectLoading } = useQuery({
+  const { data: project, isLoading: projectLoading, refetch } = useQuery({
     queryKey: ["project", parseInt(projectId ? projectId?.toString(): "0")],
     queryFn: async () => {
       const token = await getToken();
@@ -42,6 +43,36 @@ export default function ProjectIdPage() {
       return data.projectData;
     },
   });
+  
+  const [ConfirmDeleteDialog, confirmDelete] = useConfirmDelete("Are you sure you want to do this?","This action is permanent and all data will be lost", project?.title)
+  
+  const handleDelete = async () => {
+    // const confirm = await confirmDelete()
+    // if (!confirm) return;
+    const deleteResponse = await fetch(BACKEND_PROJECTS_URL+"/delete-project", {
+      method: "DELETE",
+      headers: {
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${await getToken()}`
+      },
+      body: JSON.stringify({id:parseInt(projectId!.toString())})
+    })
+
+    if (!deleteResponse.ok) {
+      toast.error("Something went wrong, couldn't delete project")
+      return;
+    }
+
+    const deleteResponseBody: ProjectDeleteResponse = await deleteResponse.json();
+
+    if (!deleteResponseBody.isSuccessful) {
+      toast.error(`Something went wrong: ${deleteResponseBody.errorMessage}`)
+      return;
+    }
+
+    toast.success(`Project '${project?.title}' has been deleted.`)
+    await refetch()
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -72,20 +103,25 @@ export default function ProjectIdPage() {
             </CardHeader>
             <CardContent>
               {project.status === "complete" && (
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    setMedia({
-                      audio: project.audioUrl,
-                      subtitle: project.captionsUrl,
-                      video: project.videoUrl,
-                      voice: project.ttsUrl,
-                    });
-                    router.push("/video-editor");
-                  }}
-                >
-                  Edit Video
-                </Button>
+                <div className="flex flex-row space-x-4 w-full">
+                  <Button
+                    className="grow"
+                    onClick={() => {
+                      setMedia({
+                        audio: project.audioUrl,
+                        subtitle: project.captionsUrl,
+                        video: project.videoUrl,
+                        voice: project.ttsUrl,
+                      });
+                      router.push("/video-editor");
+                    }}
+                  >
+                    Edit Video
+                  </Button>
+                  <Button variant={'destructive'} onClick={handleDelete} className="">
+                    Delete
+                  </Button>
+               </div> 
               )}
             </CardContent>
           </Card>
@@ -95,6 +131,7 @@ export default function ProjectIdPage() {
           </p>
         )}
       </div>
+      <ConfirmDeleteDialog/>
     </div>
   );
 }

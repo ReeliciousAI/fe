@@ -8,6 +8,10 @@ export interface PromptResponse extends BaseResponse {
   projectId: number;
 }
 
+export interface ProjectDeleteResponse extends BaseResponse {
+  projectId: number;
+}
+
 export type Project = {
   id : number;
   title : string;
