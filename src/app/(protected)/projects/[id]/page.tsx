@@ -47,8 +47,8 @@ export default function ProjectIdPage() {
   const [ConfirmDeleteDialog, confirmDelete] = useConfirmDelete("Are you sure you want to do this?","This action is permanent and all data will be lost", project?.title)
   
   const handleDelete = async () => {
-    // const confirm = await confirmDelete()
-    // if (!confirm) return;
+    const confirm = await confirmDelete()
+    if (!confirm) return;
     const deleteResponse = await fetch(BACKEND_PROJECTS_URL+"/delete-project", {
       method: "DELETE",
       headers: {
