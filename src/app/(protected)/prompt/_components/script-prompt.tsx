@@ -32,12 +32,12 @@ export default function ScriptPrompt({
   };
 
   return (
-    <Tabs defaultValue="prompt" onValueChange={(value)=>setScriptSource(value=="prompt"?SourceEnum.PROMPT:SourceEnum.FILE)} className="w-full">
+    <Tabs defaultValue={scriptSource} onValueChange={(value)=>setScriptSource(value==SourceEnum.PROMPT?SourceEnum.PROMPT:SourceEnum.FILE)} className="w-full">
       <TabsList className="w-full">
         <TabsTrigger value="prompt">Prompt</TabsTrigger>
         <TabsTrigger value="file">File</TabsTrigger>
       </TabsList>
-        <TabsContent value="prompt">
+        <TabsContent value={SourceEnum.PROMPT}>
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -45,7 +45,7 @@ export default function ScriptPrompt({
             placeholder="Enter your content prompt here..."
             />
         </TabsContent>
-        <TabsContent value="file">
+        <TabsContent value={SourceEnum.FILE}>
           <div className="space-y-3">
             <div className="flex items-center justify-center w-full">
               <label
