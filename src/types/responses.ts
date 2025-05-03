@@ -23,6 +23,15 @@ export type Project = {
   prompt? : string;
   captionsUrl? : string;
 }
+export type BackgroundVideo = {
+  id: number;
+  url: string;
+  previewUrl: string;
+  posterUrl: string;
+  urlHighQuality: string;
+  description: string;
+  category: string;
+}
 
 export interface ProjectReponse extends BaseResponse {
   projectData: Project
@@ -42,4 +51,8 @@ export type ServiceFile = {
 };
 export interface ServiceResponse extends BaseResponse {
   serviceData: ServiceFile[];
+}
+
+export interface ServiceBackgroundVideosResponse extends BaseResponse {
+  serviceData: BackgroundVideo[];
 }

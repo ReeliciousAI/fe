@@ -1,11 +1,10 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { BACKEND_PROMPT_URL, BACKEND_SERVICE_URL } from "@/config";
+import { BACKEND_PROMPT_URL, BACKEND_SERVICE_BACKGROUND_VIDEO_URL, BACKEND_SERVICE_URL } from "@/config";
 import { toneOptions } from "@/lib/db";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import QualitySelector from "@/app/(protected)/prompt/_components/quality-selector";
 import TemplateSelect from "@/app/(protected)/prompt/_components/template-select";
 import ScriptPrompt from "./_components/script-prompt";
 import BackgroundAudioSelector from "./_components/background-audio-selector";
@@ -14,7 +13,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { BaseResponse, PromptResponse, ServiceFile, ServiceResponse } from "@/types/responses";
+import { BackgroundVideo, PromptResponse, ServiceBackgroundVideosResponse, ServiceFile, ServiceResponse } from "@/types/responses";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
 
@@ -26,19 +25,19 @@ export default function PromptPage() {
     queryKey: ["template"],
     queryFn: async () => {
       const token = await getToken();
-      const res = await fetch(BACKEND_SERVICE_URL + "?type=1", {
+      const res = await fetch(BACKEND_SERVICE_BACKGROUND_VIDEO_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (!res.ok) {
         toast.error(res.statusText);
-        return null;
+        return [];
       }
-      const data: ServiceResponse = await res.json();
+      const data: ServiceBackgroundVideosResponse = await res.json();
       if (!data.isSuccessful) {
         toast.error(`Failed to fetch video templates: ${data.errorMessage}`);
-        return null;
+        return [];
       }
       return data.serviceData;
     },
@@ -55,12 +54,12 @@ export default function PromptPage() {
       });
       if (!res.ok) {
         toast.error(res.statusText);
-        return null;
+        return [];
       }
       const data: ServiceResponse = await res.json();
       if (!data.isSuccessful) {
         toast.error(`Failed to fetch background audio: ${data.errorMessage}`);
-        return null;
+        return [];
       }
       return data.serviceData;
     },
@@ -68,7 +67,6 @@ export default function PromptPage() {
 
   const [selectedAudio, setSelectedAudio] = useState<number | null>(null);
   const [selectedTone, setSelectedTone] = useState<number | null>(null);
-  const [selectedQuality, setSelectedQuality] = useState("standard");
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
   const [scriptFile, setScriptFile] = useState<File | null>(null);
@@ -104,7 +102,7 @@ export default function PromptPage() {
             (audio: ServiceFile) => audio.id === selectedAudio
           )?.url,
           video: videos!.find(
-            (video: ServiceFile) => video.id === selectedTemplate
+            (video: BackgroundVideo) => video.id === selectedTemplate
           )?.url,
         };
 

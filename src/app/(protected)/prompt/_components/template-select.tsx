@@ -1,12 +1,12 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { ServiceFile } from '@/types/responses';
+import { BackgroundVideo } from '@/types/responses';
 import React, { useRef } from 'react';
 import {BarLoader} from "react-spinners"
 
 interface ITemplateSelect  {
-  templates?: ServiceFile[];
+  templates?: BackgroundVideo[];
   loading: boolean
   selected: number | null;
   onSelect: (id: number) => void;
@@ -46,7 +46,7 @@ const TemplateSelect = ({
               if (el) videoRefs.current[index] = el;
             }}
             className="w-full h-full object-cover"
-            // poster={video.imageUrl}
+            poster={video.posterUrl}
             muted
             loop
             preload="none"
@@ -54,7 +54,7 @@ const TemplateSelect = ({
             onMouseLeave={() => handleMouseLeave(index)}
             >
             <source
-            src={video.url}
+            src={video.previewUrl}
               type='video/mp4'
             />
           </video>

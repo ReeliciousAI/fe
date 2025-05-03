@@ -1,6 +1,5 @@
 "use client";
 
-import { useMediaStore } from "@/store/mediaStore";
 import { useUser } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -12,7 +11,6 @@ import { toast } from "sonner";
 export function RabbitQListener({ children }: { children: ReactNode }) {
   const { createDisposableQueue } = useRBBT();
   const queryClient = useQueryClient()
-  const { setMedia } = useMediaStore();
   const { user } = useUser();
   const router = useRouter();
 
@@ -45,7 +43,6 @@ export function RabbitQListener({ children }: { children: ReactNode }) {
             })
             return;
           }
-          // setMedia(obj);
           refetch(obj.id)
           toast("Video has finished generating", {
             description:
@@ -53,7 +50,7 @@ export function RabbitQListener({ children }: { children: ReactNode }) {
             action: {
               label: "View",
               onClick: () => {
-                router.push("/video-editor");
+                router.push(`/projects/${obj.id}`);
               },
             },
           });

@@ -8,9 +8,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { JSX, useCallback, useRef, useState } from "react";
+import { JSX, useState } from "react";
 
-function _ConfirmDialogPopUp({
+function ConfirmDialogPopUp({
   open,
   title,
   message,
@@ -69,7 +69,7 @@ export const useConfirmDelete = (
   title: string,
   message: string,
   retypeValue?: string
-): [() => any, () => Promise<unknown>] => {
+): [() => JSX.Element, () => Promise<unknown>] => {
   const [promise, setPromise] = useState<{
     resolve: (value: boolean) => void;
   } | null>(null);
@@ -93,7 +93,7 @@ export const useConfirmDelete = (
   };
 
   const ConfirmDialog = () => (
-    <_ConfirmDialogPopUp
+    <ConfirmDialogPopUp
       open={promise != null}
       handleConfirm={handleConfirm}
       handleCancel={handleCancel}
