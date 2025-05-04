@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { BACKEND_PROMPT_URL, BACKEND_SERVICE_BACKGROUND_VIDEO_URL, BACKEND_SERVICE_URL } from "@/config";
+import { BACKEND_PROMPT_URL, BACKEND_SERVICE_URL } from "@/config";
 import { toneOptions } from "@/lib/db";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ export default function PromptPage() {
     queryKey: ["template"],
     queryFn: async () => {
       const token = await getToken();
-      const res = await fetch(BACKEND_SERVICE_BACKGROUND_VIDEO_URL, {
+      const res = await fetch(BACKEND_SERVICE_URL+"?type=1", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -47,7 +47,7 @@ export default function PromptPage() {
     queryKey: ["audio"],
     queryFn: async () => {
       const token = await getToken();
-      const res = await fetch(BACKEND_SERVICE_URL + "?type=3", {
+      const res = await fetch(BACKEND_SERVICE_URL + "?type=2", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
