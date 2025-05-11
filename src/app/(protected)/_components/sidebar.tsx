@@ -51,7 +51,7 @@ export default function CustomSidebar({
                     <Sparkles className="size-4" />
                   </div>
                   <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">ConGen.Ai</span>
+                    <span className="font-semibold">ReeliciousAi</span>
                     <span className="text-xs text-muted-foreground">
                       AI-powered content
                     </span>
